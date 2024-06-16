@@ -17,42 +17,46 @@
  * Modified by: Luca Heltai, 2020
  */
 
-#include "laplacian.h"
 
-int
-main()
+#include "StokesProblem.h"
+
+
+
+int main()
 {
-  try
+    try
     {
-      Laplacian<DEAL_DIMENSION> laplace_problem;
-      laplace_problem.run();
-    }
-  catch (std::exception &exc)
-    {
-      std::cerr << std::endl
-                << std::endl
-                << "----------------------------------------------------"
-                << std::endl;
-      std::cerr << "Exception on processing: " << std::endl
-                << exc.what() << std::endl
-                << "Aborting!" << std::endl
-                << "----------------------------------------------------"
-                << std::endl;
+        using namespace project;
 
-      return 1;
+        StokesProblem<DEAL_DIMENSION> flow_problem(1);
+        flow_problem.run();
     }
-  catch (...)
+    catch (std::exception &exc)
     {
-      std::cerr << std::endl
-                << std::endl
-                << "----------------------------------------------------"
-                << std::endl;
-      std::cerr << "Unknown exception!" << std::endl
-                << "Aborting!" << std::endl
-                << "----------------------------------------------------"
-                << std::endl;
-      return 1;
+        std::cerr << std::endl
+                  << std::endl
+                  << "----------------------------------------------------"
+                  << std::endl;
+        std::cerr << "Exception on processing: " << std::endl
+                  << exc.what() << std::endl
+                  << "Aborting!" << std::endl
+                  << "----------------------------------------------------"
+                  << std::endl;
+
+        return 1;
+    }
+    catch (...)
+    {
+        std::cerr << std::endl
+                  << std::endl
+                  << "----------------------------------------------------"
+                  << std::endl;
+        std::cerr << "Unknown exception!" << std::endl
+                  << "Aborting!" << std::endl
+                  << "----------------------------------------------------"
+                  << std::endl;
+        return 1;
     }
 
-  return 0;
+    return 0;
 }

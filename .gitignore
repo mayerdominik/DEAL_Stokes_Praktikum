@@ -27,8 +27,12 @@
 *.out
 *.app
 
+*.vtk
+
 # CMake garbage
 CMakeFiles
 CMakeCache.txt
 
 compile_commands.json
+
+cmake-build-debug/*

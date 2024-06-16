@@ -27,7 +27,7 @@
 # Set the name of the project and target
 # If your application follows the structure above, you don't need to 
 # specify anything else. 
-SET(_main_target laplacian)
+SET(_main_target stokes)
 SET(_main source/main.cc)
 
 # Set the _main variable to empty if you don't want an executable
@@ -85,13 +85,13 @@ FOREACH(_build_type ${_d2_build_types})
     # Setup library
     SET(_lib "${_main_target}${_p}")
     MESSAGE("-- Configuring library ${_lib}")
-
+    message(${_files})
     ADD_LIBRARY(${_lib} SHARED ${_files})
     DEAL_II_SETUP_TARGET(${_lib} ${_BUILD_TYPE})
     SET(TEST_LIBRARIES_${_BUILD_TYPE} ${_lib})
 
     # Setup one executable per dimension/per build type
-    FOREACH(_dim 1 2 3)
+    FOREACH(_dim 2 3)
       SET(_exe "${_main_target}_${_dim}d${${_build_type}_postfix}")
       MESSAGE("-- Configuring executable ${_exe}")
       ADD_EXECUTABLE(${_exe} ${_main})
