@@ -37,11 +37,7 @@ namespace project {
 
             const FEValuesExtractors::Vector velocities(0);
             DoFTools::make_hanging_node_constraints(dof_handler, constraints);
-            VectorTools::interpolate_boundary_values(dof_handler,
-                                                     1,
-                                                     BoundaryValues<dim>(),
-                                                     constraints,
-                                                     fe.component_mask(velocities));
+
         }
 
         constraints.close();
@@ -108,11 +104,15 @@ namespace project {
         preconditioner_matrix = 0;
 
         QGauss<dim> quadrature_formula(degree + 2);
+        QGauss<dim - 1> face_quadrature_formula(degree + 1);
 
         FEValues<dim> fe_values(fe,
                                 quadrature_formula,
                                 update_values | update_quadrature_points |
                                 update_JxW_values | update_gradients);
+
+
+
 
         const unsigned int dofs_per_cell = fe.n_dofs_per_cell();
 
@@ -155,7 +155,9 @@ namespace project {
                     div_phi_u[k] = fe_values[velocities].divergence(k, q);
                     phi_u[k]     = fe_values[velocities].value(k, q);
                     phi_p[k]     = fe_values[pressure].value(k, q);
+
                 }
+
 
                 for (unsigned int i = 0; i < dofs_per_cell; ++i)
                 {
