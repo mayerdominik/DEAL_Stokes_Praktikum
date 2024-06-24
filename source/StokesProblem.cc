@@ -236,7 +236,7 @@ namespace project {
     FEInterfaceValues<dim> fe_interface_values(fe_collection[0],
                                                face_quadrature,
                                                update_gradients |
-                                                 update_JxW_values |
+                                                 update_JxW_values | update_hessians |
                                                  update_normal_vectors);
  
  
@@ -465,10 +465,16 @@ namespace project {
                           fe_interface_values.JxW(q);
                        
                        local_stabilization(i, j) +=
-                          .5 * 	ghost_parameter * cell_side_length * (normal *
+                          	ghost_parameter * cell_side_length * (normal *
                           fe_interface_values[velocities].jump_in_gradients(i, q)) * 
                           (normal *
                           fe_interface_values[velocities].jump_in_gradients(j, q)) *
+                          fe_interface_values.JxW(q) 
+                          +   
+                           	0.5 * ghost_parameter * cell_side_length * cell_side_length * cell_side_length * 0.25 * (normal *
+                          (normal * fe_interface_values[velocities].jump_in_hessians(i, q))) * 
+                          (normal *
+                          (normal * fe_interface_values[velocities].jump_in_hessians(j, q))) *
                           fe_interface_values.JxW(q);
                       }
                 }
