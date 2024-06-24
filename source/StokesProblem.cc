@@ -92,12 +92,12 @@ namespace project {
       constraints.clear();
  
       const FEValuesExtractors::Vector velocities(0);
-      DoFTools::make_hanging_node_constraints(dof_handler, constraints);
+      /*DoFTools::make_hanging_node_constraints(dof_handler, constraints);
       VectorTools::interpolate_boundary_values(dof_handler,
                                                1,
                                                BoundaryValues<dim>(),
                                                constraints,
-                                               fe_collection[0].component_mask(velocities));
+                                               fe_collection[0].component_mask(velocities));*/
     }
  
     constraints.close();
@@ -267,10 +267,10 @@ namespace project {
     
     std::vector<Tensor<1, dim, double>>  grad_phi_p(dofs_per_cell);
 
- 
+ 	int count = 0;
     for (const auto &cell : dof_handler.active_cell_iterators() | IteratorFilters::ActiveFEIndexEqualTo(ActiveFEIndex::lagrange))
       {
- 
+ 	std::cout << "Cell number " << count++ << std::endl; 
         local_matrix                = 0;
         local_preconditioner_matrix = 0;
         local_rhs                   = 0;
@@ -304,10 +304,10 @@ namespace project {
                  // std::cout << "innerloop " << i << " " << j << " " <<dofs_per_cell  << std::endl;
                     local_matrix(i, j) +=
                       ((double_contraction(grad_phi_u[i],grad_phi_u[j])) // (1)
-                       //- (div_phi_u[i] * phi_p[j])                 // (2)
-                       //- phi_p[i] * div_phi_u[j]                 // (3)
-                       - phi_u[j] * grad_phi_p[i]
-                       + phi_u[i] * grad_phi_p[j])
+                       - (div_phi_u[i] * phi_p[j])                 // (2)
+                       - phi_p[i] * div_phi_u[j] )                // (3)
+                       //- phi_u[j] * grad_phi_p[i]
+                       //+ phi_u[i] * grad_phi_p[j])
                       * inside_fe_values->JxW(q);                        // * dx
                       
                       //if((symgrad_phi_u[i] * symgrad_phi_u[j]) == 0 && phi_p[i] * div_phi_u[j] == 0 && div_phi_u[i] * phi_p[j] == 0) std::cout << "Both 0 " << std::endl;
@@ -328,20 +328,32 @@ namespace project {
               }
           }
           }
-
+          
           for (unsigned int i = 0; i < dofs_per_cell; ++i)  
             for (unsigned int j = i + 1; j < dofs_per_cell; ++j)
             {
               local_matrix(i, j) = local_matrix(j, i);
               local_preconditioner_matrix(i, j) =
                 local_preconditioner_matrix(j, i);
+                
+                
             }
+	
+	          for (unsigned int i = 0; i < dofs_per_cell; ++i)  {
+            for (unsigned int j = 0; j < dofs_per_cell; ++j)
+            {
+             // std::cout << local_matrix(i, j) << " ";                
+            }
+            	//std::cout << std::endl;
+            }
+
+
          // std::cout << "t" << std::endl;
           BoundaryValues<dim> boundary_condition;
           
           const std::optional<NonMatching::FEImmersedSurfaceValues<dim>> &surface_fe_values = non_matching_fe_values.get_surface_fe_values();
           
-          if (1 == 0 && surface_fe_values)
+          if (surface_fe_values)
           {
             for (const unsigned int q :
                  surface_fe_values->quadrature_point_indices())
@@ -349,15 +361,19 @@ namespace project {
                 const Point<dim> &point = surface_fe_values->quadrature_point(q);
                 const Tensor<1, dim> &normal = surface_fe_values->normal_vector(q);
                 
+                std::cout << point << std::endl;
+                
                 //std::vector<double> b();
                 Vector<double> b(dim + 1);
                 std::vector<double> v(dim);
-
+                std::cout << "test1" << std::endl; 
                 boundary_condition.vector_value(point, b);
                 for(int i = 0; i < dim; i++){
                 	v[i] = b[i];
+                	std::cout << v[i] << std::endl;
                 }
                 
+                std::cout << "surface_fe_values "<< count << std::endl;
                 
 		dealii::ArrayView<double> b1(v);
 		dealii::Tensor<1, dim> g(b1);
@@ -368,13 +384,13 @@ namespace project {
                          surface_fe_values->dof_indices())
                       {
                         local_matrix(i, j) +=
-                          (-normal * (*surface_fe_values).shape_grad(i, q) *
-                             (*surface_fe_values).shape_value(j, q) +
-                           -normal * (*surface_fe_values).shape_grad(j, q) *
-                             (*surface_fe_values).shape_value(i, q) +
+                          (-normal * (*surface_fe_values)[velocities].gradient(i, q) *
+                             (*surface_fe_values)[velocities].value(j, q) +
+                           -normal * (*surface_fe_values)[velocities].gradient(j, q) *
+                             (*surface_fe_values)[velocities].value(i, q) +
                            nitsche_parameter / cell_side_length *
-                             (*surface_fe_values).shape_value(i, q) *
-                             (*surface_fe_values).shape_value(j, q)) *
+                             (*surface_fe_values)[velocities].value(i, q) *
+                             (*surface_fe_values)[velocities].value(j, q)) *
                           surface_fe_values->JxW(q);
                       }
                     local_rhs(i) +=
@@ -382,43 +398,42 @@ namespace project {
                       (nitsche_parameter / cell_side_length *
                          (*surface_fe_values)[velocities].value(i, q) -
                        normal * (*surface_fe_values)[velocities].gradient(i, q)
-                       + normal * (*surface_fe_values)[pressure].value(i, q)) *
+                       //+ normal * (*surface_fe_values)[pressure].value(i, q)
+                       ) *
                       surface_fe_values->JxW(q);
                   }
               }
           }
-
-
-         for (unsigned int i = 0; i < dofs_per_cell; ++i)
-          for (unsigned int j = i + 1; j < dofs_per_cell; ++j)
-            {
-              local_matrix(i, j) = local_matrix(j, i);
-              local_preconditioner_matrix(i, j) =
-                local_preconditioner_matrix(j, i);
-            }
-            
-          /*for(int i = 0; i < dofs_per_cell; ++i){
-          	for(int j = 0; j < dofs_per_cell; ++j){
-          		std::cout << std::setprecision(3) << local_matrix(i,j) << " ";
-          	}
-          	std::cout << std::endl;*/
-         // }
-          
-
-          
         cell->get_dof_indices(local_dof_indices);
         constraints.distribute_local_to_global(local_matrix,
                                                local_rhs,
                                                local_dof_indices,
                                                system_matrix,
                                                system_rhs);
-
+                                               std::cout<<"const" <<std::endl;
         constraints.distribute_local_to_global(local_preconditioner_matrix,
                                                local_dof_indices,
                                                preconditioner_matrix);
 
-              for (const unsigned int f : cell->face_indices())
-          if (1 == 0 && face_has_ghost_penalty(cell, f))
+/*
+
+        for (unsigned int i = 0; i < dofs_per_cell; ++i)
+          for (unsigned int j = i + 1; j < dofs_per_cell; ++j)
+            {
+              local_matrix(i, j) = local_matrix(j, i);
+              local_preconditioner_matrix(i, j) =
+                local_preconditioner_matrix(j, i);
+            }*/
+            
+          /*for(int i = 0; i < dofs_per_cell; ++i){
+          	for(int j = 0; j < dofs_per_cell; ++j){
+          		std::cout << std::setprecision(3) << local_matrix(i,j) << " ";
+          	}
+          	std::cout << std::endl;
+          }*/
+                               
+        for (const unsigned int f : cell->face_indices())
+          if (face_has_ghost_penalty(cell, f))
             {
               const unsigned int invalid_subface =
                 numbers::invalid_unsigned_int;
@@ -462,13 +477,14 @@ namespace project {
                 local_interface_dof_indices =
                   fe_interface_values.get_interface_dof_indices();
  
-              system_matrix.add(local_interface_dof_indices,
-                                   local_stabilization);
+ 		constraints.distribute_local_to_global(local_stabilization, local_interface_dof_indices, system_matrix);
+             // system_matrix.add(local_interface_dof_indices,
+           //                        local_stabilization);
             }
       }
  std::cout << system_matrix.block(0,0).n() << std::endl;
   std::cout << system_matrix.block(0,0).n_actually_nonzero_elements() << std::endl;
-
+    std::cout << "Computing preconditioner..." << std::endl << std::flush;
  
     A_preconditioner =
       std::make_shared<typename InnerPreconditioner<dim>::type>();
@@ -477,8 +493,9 @@ namespace project {
       system_matrix.block(0, 0),
       typename InnerPreconditioner<dim>::type::AdditionalData());
       
-
+      std::cout << "done prec" << std::endl;
   }
+ 
  
     template <int dim>
     void StokesProblem<dim>::solve()
@@ -497,7 +514,7 @@ namespace project {
             SchurComplement<typename InnerPreconditioner<dim>::type> schur_complement(
                     system_matrix, A_inverse);
 
-            SolverControl            solver_control(solution.block(1).size(),
+            SolverControl            solver_control(solution.block(1).size() + 150,
                                                     1e-6 * schur_rhs.l2_norm());
             SolverCG<Vector<double>> cg(solver_control);
 
@@ -550,6 +567,14 @@ namespace project {
                                  solution_names,
                                  DataOut<dim>::type_dof_data,
                                  data_component_interpretation);
+                                 
+	data_out.set_cell_selection(
+	      [this](const typename Triangulation<dim>::cell_iterator &cell) {
+		return cell->is_active() &&
+		       mesh_classifier.location_to_level_set(cell) !=
+		         NonMatching::LocationToLevelSet::outside;
+	      });
+      
         data_out.build_patches();
 
         std::ofstream output(
@@ -597,10 +622,11 @@ namespace project {
                                           Point<dim>(2, 0) :    // 2d case
                                           Point<dim>(2, 1, 0)); // 3d case
 
-            GridGenerator::subdivided_hyper_rectangle(triangulation,
+      	GridGenerator::hyper_cube(triangulation, -1.21,1.21);
+           /* GridGenerator::subdivided_hyper_rectangle(triangulation,
                                                       subdivisions,
                                                       bottom_left,
-                                                      top_right);
+                                                      top_right);*/
         }
 
         for (const auto &cell : triangulation.active_cell_iterators())
@@ -609,9 +635,9 @@ namespace project {
                     face->set_all_boundary_ids(1);
 
 
-        triangulation.refine_global(4 - dim);
+        triangulation.refine_global(5 - dim);
 
-        for (unsigned int refinement_cycle = 0; refinement_cycle < 6;
+        for (unsigned int refinement_cycle = 0; refinement_cycle < 1;
              ++refinement_cycle)
         {
             std::cout << "Refinement cycle " << refinement_cycle << std::endl;
