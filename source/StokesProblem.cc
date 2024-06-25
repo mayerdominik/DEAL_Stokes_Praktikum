@@ -26,8 +26,10 @@ namespace project {
    template<int dim>
    double double_contraction(dealii::Tensor<2,dim>& t1, dealii::Tensor<2,dim>& t2) {
        double sum = 0;
+       //for(int j = 0; j < 2; j++){
        for(int i = 0; i < 2; i++){
            sum += t1[i] * t2[i];
+      // }
        }
        return sum;
    }
@@ -60,7 +62,8 @@ namespace project {
     level_set_dof_handler.distribute_dofs(fe_level_set);
     level_set.reinit(level_set_dof_handler.n_dofs());
  
-    const Functions::SignedDistance::Sphere<dim> signed_distance_sphere;
+    Point<dim> center(0,0);
+    const Functions::SignedDistance::Sphere<dim> signed_distance_sphere(center,1);
     VectorTools::interpolate(level_set_dof_handler,
                              signed_distance_sphere,
                              level_set);
@@ -92,8 +95,8 @@ namespace project {
       constraints.clear();
  
       const FEValuesExtractors::Vector velocities(0);
-      /*DoFTools::make_hanging_node_constraints(dof_handler, constraints);
-      VectorTools::interpolate_boundary_values(dof_handler,
+      /*DoFTools::make_hanging_node_constraints(dof_handler, constraints);*/
+      /*VectorTools::interpolate_boundary_values(dof_handler,
                                                1,
                                                BoundaryValues<dim>(),
                                                constraints,
@@ -129,7 +132,7 @@ namespace project {
             face_coupling[c][d] = DoFTools::always;
             }
           else {
-            coupling[c][d] = DoFTools::always;
+            coupling[c][d] = DoFTools::none;
             face_coupling[c][d] = DoFTools::always;
          }
 					
@@ -143,6 +146,10 @@ namespace project {
                                          face_coupling,
                                          numbers::invalid_subdomain_id,
                                          face_has_flux_coupling);
+                                         
+	  
+        /*DoFTools::make_sparsity_pattern(
+          dof_handler, coupling, dsp, constraints, false);*/
  
       sparsity_pattern.copy_from(dsp);
     }
@@ -157,7 +164,7 @@ namespace project {
           if (((c == dim) && (d == dim)))
             preconditioner_coupling[c][d] = DoFTools::always;
           else
-            preconditioner_coupling[c][d] = DoFTools::always;
+            preconditioner_coupling[c][d] = DoFTools::none;
  
       DoFTools::make_sparsity_pattern(dof_handler,
                                       preconditioner_coupling,
@@ -260,6 +267,7 @@ namespace project {
     const FEValuesExtractors::Vector velocities(0);
     const FEValuesExtractors::Scalar pressure(dim);
  
+     std::vector<SymmetricTensor<2, dim>> symgrad_phi_u(dofs_per_cell);
     std::vector<Tensor<2, dim, double>> grad_phi_u(dofs_per_cell);
     std::vector<double>                  div_phi_u(dofs_per_cell);
     std::vector<Tensor<1, dim, double>>          phi_u(dofs_per_cell);
@@ -290,7 +298,8 @@ namespace project {
           {
             for (unsigned int k = 0; k < dofs_per_cell; ++k)
               {
-              
+                         symgrad_phi_u[k] =
+                  (*inside_fe_values)[velocities].symmetric_gradient(k, q);
                 grad_phi_u[k] = (*inside_fe_values)[velocities].gradient(k, q);
                 div_phi_u[k] = (*inside_fe_values)[velocities].divergence(k, q);
                 phi_u[k]     = (*inside_fe_values)[velocities].value(k, q);
@@ -303,7 +312,8 @@ namespace project {
                   {
                  // std::cout << "innerloop " << i << " " << j << " " <<dofs_per_cell  << std::endl;
                     local_matrix(i, j) +=
-                      ((double_contraction(grad_phi_u[i],grad_phi_u[j])) // (1)
+                      ((double_contraction(grad_phi_u[i], grad_phi_u[j])) // (1)
+                       //(2 * (symgrad_phi_u[i] * symgrad_phi_u[j]) // (1)
                        - (div_phi_u[i] * phi_p[j])                 // (2)
                        - phi_p[i] * div_phi_u[j] )                // (3)
                        //- phi_u[j] * grad_phi_p[i]
@@ -321,7 +331,7 @@ namespace project {
                       (phi_p[i] * phi_p[j]) // (4)
                       * inside_fe_values->JxW(q);   // * dx
                   }
-                  //std::cout << "t" << std::endl;
+
                 local_rhs(i) += phi_u[i]            // phi_u_i(x_q)
                                 * rhs_values[q]     // * f(x_q)
                                 * inside_fe_values->JxW(q); // * dx
@@ -339,14 +349,6 @@ namespace project {
                 
             }
 	
-	          for (unsigned int i = 0; i < dofs_per_cell; ++i)  {
-            for (unsigned int j = 0; j < dofs_per_cell; ++j)
-            {
-             // std::cout << local_matrix(i, j) << " ";                
-            }
-            	//std::cout << std::endl;
-            }
-
 
          // std::cout << "t" << std::endl;
           BoundaryValues<dim> boundary_condition;
@@ -366,7 +368,7 @@ namespace project {
                 //std::vector<double> b();
                 Vector<double> b(dim + 1);
                 std::vector<double> v(dim);
-                std::cout << "test1" << std::endl; 
+
                 boundary_condition.vector_value(point, b);
                 for(int i = 0; i < dim; i++){
                 	v[i] = b[i];
@@ -398,7 +400,7 @@ namespace project {
                       (nitsche_parameter / cell_side_length *
                          (*surface_fe_values)[velocities].value(i, q) -
                        normal * (*surface_fe_values)[velocities].gradient(i, q)
-                       //+ normal * (*surface_fe_values)[pressure].value(i, q)
+                      // + normal * (*surface_fe_values)[pressure].value(i, q)
                        ) *
                       surface_fe_values->JxW(q);
                   }
@@ -465,16 +467,16 @@ namespace project {
                           fe_interface_values.JxW(q);
                        
                        local_stabilization(i, j) +=
-                          	ghost_parameter * cell_side_length * (normal *
+                          0.5 * ghost_parameter * cell_side_length * (normal *
                           fe_interface_values[velocities].jump_in_gradients(i, q)) * 
                           (normal *
                           fe_interface_values[velocities].jump_in_gradients(j, q)) *
                           fe_interface_values.JxW(q) 
                           +   
-                           	0.5 * ghost_parameter * cell_side_length * cell_side_length * cell_side_length * 0.25 * (normal *
-                          (normal * fe_interface_values[velocities].jump_in_hessians(i, q))) * 
-                          (normal *
-                          (normal * fe_interface_values[velocities].jump_in_hessians(j, q))) *
+                           .5 * ghost_parameter * cell_side_length * cell_side_length * cell_side_length * 0.25 * (
+                          normal * (normal * fe_interface_values[velocities].jump_in_hessians(i, q))) * 
+                          (
+                          normal * (normal * fe_interface_values[velocities].jump_in_hessians(j, q))) *
                           fe_interface_values.JxW(q);
                       }
                 }
@@ -637,7 +639,7 @@ namespace project {
 
         for (const auto &cell : triangulation.active_cell_iterators())
             for (const auto &face : cell->face_iterators())
-                if (face->center()[dim - 1] == 0)
+                if (face->center()[dim - 1] >= 1.20)
                     face->set_all_boundary_ids(1);
 
 
