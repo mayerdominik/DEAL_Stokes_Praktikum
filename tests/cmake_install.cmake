@@ -1,4 +1,4 @@
-# Install script for directory: /home/jul/Documents/SimulationOfMat/git/DEAL_Stokes_Praktikum/tests
+# Install script for directory: /mnt/c/users/korin/documents/uni heidelberg/deal.II/DEAL_Stokes_Praktikum/tests
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
