@@ -83,6 +83,7 @@ namespace project {
     void solve();
     void output_results(const unsigned int refinement_cycle) const;
     void refine_mesh();
+    void setup_discrete_level_set();
     
 
     const unsigned int degree;
