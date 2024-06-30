@@ -241,6 +241,30 @@ source/BoundaryValues.cc.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/stokes.g.dir/build.make CMakeFiles/stokes.g.dir/source/BoundaryValues.cc.s
 .PHONY : source/BoundaryValues.cc.s
 
+source/ExactSolution.o: source/ExactSolution.cc.o
+.PHONY : source/ExactSolution.o
+
+# target to build an object file
+source/ExactSolution.cc.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/stokes.g.dir/build.make CMakeFiles/stokes.g.dir/source/ExactSolution.cc.o
+.PHONY : source/ExactSolution.cc.o
+
+source/ExactSolution.i: source/ExactSolution.cc.i
+.PHONY : source/ExactSolution.i
+
+# target to preprocess a source file
+source/ExactSolution.cc.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/stokes.g.dir/build.make CMakeFiles/stokes.g.dir/source/ExactSolution.cc.i
+.PHONY : source/ExactSolution.cc.i
+
+source/ExactSolution.s: source/ExactSolution.cc.s
+.PHONY : source/ExactSolution.s
+
+# target to generate assembly for a file
+source/ExactSolution.cc.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/stokes.g.dir/build.make CMakeFiles/stokes.g.dir/source/ExactSolution.cc.s
+.PHONY : source/ExactSolution.cc.s
+
 source/InverseMatrix.o: source/InverseMatrix.cc.o
 .PHONY : source/InverseMatrix.o
 
@@ -383,6 +407,9 @@ help:
 	@echo "... source/BoundaryValues.o"
 	@echo "... source/BoundaryValues.i"
 	@echo "... source/BoundaryValues.s"
+	@echo "... source/ExactSolution.o"
+	@echo "... source/ExactSolution.i"
+	@echo "... source/ExactSolution.s"
 	@echo "... source/InverseMatrix.o"
 	@echo "... source/InverseMatrix.i"
 	@echo "... source/InverseMatrix.s"

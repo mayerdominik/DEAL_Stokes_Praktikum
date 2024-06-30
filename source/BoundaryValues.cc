@@ -12,10 +12,10 @@ namespace project{
 
         if (component == 0)
         {
-            if (p[0] < 0 && p[1] > 0.8)
-                return -1;
-            else if (p[0] > 0 && p[1] > 0.8)
-                return 1;
+            if (p[0] < 0.4)
+                return 0;
+            else if (p[0] > 0.4 )
+                return 0;
             else
                 return 0;
         }
