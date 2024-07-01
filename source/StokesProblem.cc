@@ -7,8 +7,6 @@
 #include "BoundaryValues.h"
 #include "ExactSolution.h"
 
-
-
 namespace project {
     using namespace dealii;
 
@@ -70,6 +68,7 @@ namespace project {
                              level_set);
     
     fe_collection.push_back(FESystem<dim>(FE_Q<dim>(degree + 1) ^ dim, FE_Q<dim>(degree)));
+    //FE_DQ<dim>(0)
     fe_collection.push_back(FESystem<dim>(FE_Nothing<dim>() ^ dim, FE_Nothing<dim>()));
     
     mesh_classifier.reclassify();
@@ -401,11 +400,11 @@ namespace project {
                              (*surface_fe_values)[velocities].value(i, q) *
                              (*surface_fe_values)[velocities].value(j, q)
                              
-                             /*+normal *  (*surface_fe_values)[velocities].value(j, q) *
-                              (*surface_fe_values)[pressure].value(i, q)*/
+                             +normal *  (*surface_fe_values)[velocities].value(j, q) *
+                              (*surface_fe_values)[pressure].value(i, q)
                               
-                            /* + normal *  (*surface_fe_values)[velocities].value(i, q) *
-                              (*surface_fe_values)[pressure].value(j, q)*/
+                             + normal *  (*surface_fe_values)[velocities].value(i, q) *
+                              (*surface_fe_values)[pressure].value(j, q)
                              ) *
                           surface_fe_values->JxW(q);
                       }
@@ -414,7 +413,7 @@ namespace project {
                       (nitsche_parameter / cell_side_length *
                          (*surface_fe_values)[velocities].value(i, q) -
                        normal * (*surface_fe_values)[velocities].gradient(i, q)
-                       //+ normal * (*surface_fe_values)[pressure].value(i, q)
+                       + normal * (*surface_fe_values)[pressure].value(i, q)
                        )) *
                       surface_fe_values->JxW(q);
                   }
@@ -530,6 +529,10 @@ namespace project {
     template <int dim>
     void StokesProblem<dim>::solve()
     {
+    //GMRes
+    //MinRes
+    //BlockSolver 
+    
         const InverseMatrix<SparseMatrix<double>,
                 typename InnerPreconditioner<dim>::type>
                 A_inverse(system_matrix.block(0, 0), *A_preconditioner);
@@ -683,7 +686,7 @@ namespace project {
                     face->set_all_boundary_ids(1);*/
 
 
-        triangulation.refine_global(4 - dim);
+        triangulation.refine_global(8 - dim);
 
         for (unsigned int refinement_cycle = 0; refinement_cycle < 1;
              ++refinement_cycle)
