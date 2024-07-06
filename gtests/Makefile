@@ -97,14 +97,14 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/dome/projects/DEAL_Stokes_Praktikum && $(CMAKE_COMMAND) -E cmake_progress_start /home/dome/projects/DEAL_Stokes_Praktikum/CMakeFiles /home/dome/projects/DEAL_Stokes_Praktikum/tests//CMakeFiles/progress.marks
-	cd /home/dome/projects/DEAL_Stokes_Praktikum && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/all
+	cd /home/dome/projects/DEAL_Stokes_Praktikum && $(CMAKE_COMMAND) -E cmake_progress_start /home/dome/projects/DEAL_Stokes_Praktikum/CMakeFiles /home/dome/projects/DEAL_Stokes_Praktikum/gtests//CMakeFiles/progress.marks
+	cd /home/dome/projects/DEAL_Stokes_Praktikum && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 gtests/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/dome/projects/DEAL_Stokes_Praktikum/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/dome/projects/DEAL_Stokes_Praktikum && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/clean
+	cd /home/dome/projects/DEAL_Stokes_Praktikum && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 gtests/clean
 .PHONY : clean
 
 # The main clean target
@@ -113,12 +113,12 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/dome/projects/DEAL_Stokes_Praktikum && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/preinstall
+	cd /home/dome/projects/DEAL_Stokes_Praktikum && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 gtests/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/dome/projects/DEAL_Stokes_Praktikum && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/preinstall
+	cd /home/dome/projects/DEAL_Stokes_Praktikum && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 gtests/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
@@ -127,70 +127,66 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
-tests/CMakeFiles/compile_test_executables.dir/rule:
-	cd /home/dome/projects/DEAL_Stokes_Praktikum && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/CMakeFiles/compile_test_executables.dir/rule
-.PHONY : tests/CMakeFiles/compile_test_executables.dir/rule
+gtests/CMakeFiles/gtests.g.dir/rule:
+	cd /home/dome/projects/DEAL_Stokes_Praktikum && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 gtests/CMakeFiles/gtests.g.dir/rule
+.PHONY : gtests/CMakeFiles/gtests.g.dir/rule
 
 # Convenience name for target.
-compile_test_executables: tests/CMakeFiles/compile_test_executables.dir/rule
-.PHONY : compile_test_executables
+gtests.g: gtests/CMakeFiles/gtests.g.dir/rule
+.PHONY : gtests.g
 
 # fast build rule for target.
-compile_test_executables/fast:
-	cd /home/dome/projects/DEAL_Stokes_Praktikum && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/compile_test_executables.dir/build.make tests/CMakeFiles/compile_test_executables.dir/build
-.PHONY : compile_test_executables/fast
+gtests.g/fast:
+	cd /home/dome/projects/DEAL_Stokes_Praktikum && $(MAKE) $(MAKESILENT) -f gtests/CMakeFiles/gtests.g.dir/build.make gtests/CMakeFiles/gtests.g.dir/build
+.PHONY : gtests.g/fast
 
-# Convenience name for target.
-tests/CMakeFiles/tests.template.debug.dir/rule:
-	cd /home/dome/projects/DEAL_Stokes_Praktikum && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/CMakeFiles/tests.template.debug.dir/rule
-.PHONY : tests/CMakeFiles/tests.template.debug.dir/rule
-
-# Convenience name for target.
-tests.template.debug: tests/CMakeFiles/tests.template.debug.dir/rule
-.PHONY : tests.template.debug
-
-# fast build rule for target.
-tests.template.debug/fast:
-	cd /home/dome/projects/DEAL_Stokes_Praktikum && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/tests.template.debug.dir/build.make tests/CMakeFiles/tests.template.debug.dir/build
-.PHONY : tests.template.debug/fast
-
-# Convenience name for target.
-tests/CMakeFiles/tests.template.debug.test.dir/rule:
-	cd /home/dome/projects/DEAL_Stokes_Praktikum && $(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests/CMakeFiles/tests.template.debug.test.dir/rule
-.PHONY : tests/CMakeFiles/tests.template.debug.test.dir/rule
-
-# Convenience name for target.
-tests.template.debug.test: tests/CMakeFiles/tests.template.debug.test.dir/rule
-.PHONY : tests.template.debug.test
-
-# fast build rule for target.
-tests.template.debug.test/fast:
-	cd /home/dome/projects/DEAL_Stokes_Praktikum && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/tests.template.debug.test.dir/build.make tests/CMakeFiles/tests.template.debug.test.dir/build
-.PHONY : tests.template.debug.test/fast
-
-template.o: template.cc.o
-.PHONY : template.o
+gtest_main.o: gtest_main.cc.o
+.PHONY : gtest_main.o
 
 # target to build an object file
-template.cc.o:
-	cd /home/dome/projects/DEAL_Stokes_Praktikum && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/tests.template.debug.dir/build.make tests/CMakeFiles/tests.template.debug.dir/template.cc.o
-.PHONY : template.cc.o
+gtest_main.cc.o:
+	cd /home/dome/projects/DEAL_Stokes_Praktikum && $(MAKE) $(MAKESILENT) -f gtests/CMakeFiles/gtests.g.dir/build.make gtests/CMakeFiles/gtests.g.dir/gtest_main.cc.o
+.PHONY : gtest_main.cc.o
 
-template.i: template.cc.i
-.PHONY : template.i
+gtest_main.i: gtest_main.cc.i
+.PHONY : gtest_main.i
 
 # target to preprocess a source file
-template.cc.i:
-	cd /home/dome/projects/DEAL_Stokes_Praktikum && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/tests.template.debug.dir/build.make tests/CMakeFiles/tests.template.debug.dir/template.cc.i
-.PHONY : template.cc.i
+gtest_main.cc.i:
+	cd /home/dome/projects/DEAL_Stokes_Praktikum && $(MAKE) $(MAKESILENT) -f gtests/CMakeFiles/gtests.g.dir/build.make gtests/CMakeFiles/gtests.g.dir/gtest_main.cc.i
+.PHONY : gtest_main.cc.i
 
-template.s: template.cc.s
-.PHONY : template.s
+gtest_main.s: gtest_main.cc.s
+.PHONY : gtest_main.s
 
 # target to generate assembly for a file
-template.cc.s:
-	cd /home/dome/projects/DEAL_Stokes_Praktikum && $(MAKE) $(MAKESILENT) -f tests/CMakeFiles/tests.template.debug.dir/build.make tests/CMakeFiles/tests.template.debug.dir/template.cc.s
-.PHONY : template.cc.s
+gtest_main.cc.s:
+	cd /home/dome/projects/DEAL_Stokes_Praktikum && $(MAKE) $(MAKESILENT) -f gtests/CMakeFiles/gtests.g.dir/build.make gtests/CMakeFiles/gtests.g.dir/gtest_main.cc.s
+.PHONY : gtest_main.cc.s
+
+simple_check.o: simple_check.cc.o
+.PHONY : simple_check.o
+
+# target to build an object file
+simple_check.cc.o:
+	cd /home/dome/projects/DEAL_Stokes_Praktikum && $(MAKE) $(MAKESILENT) -f gtests/CMakeFiles/gtests.g.dir/build.make gtests/CMakeFiles/gtests.g.dir/simple_check.cc.o
+.PHONY : simple_check.cc.o
+
+simple_check.i: simple_check.cc.i
+.PHONY : simple_check.i
+
+# target to preprocess a source file
+simple_check.cc.i:
+	cd /home/dome/projects/DEAL_Stokes_Praktikum && $(MAKE) $(MAKESILENT) -f gtests/CMakeFiles/gtests.g.dir/build.make gtests/CMakeFiles/gtests.g.dir/simple_check.cc.i
+.PHONY : simple_check.cc.i
+
+simple_check.s: simple_check.cc.s
+.PHONY : simple_check.s
+
+# target to generate assembly for a file
+simple_check.cc.s:
+	cd /home/dome/projects/DEAL_Stokes_Praktikum && $(MAKE) $(MAKESILENT) -f gtests/CMakeFiles/gtests.g.dir/build.make gtests/CMakeFiles/gtests.g.dir/simple_check.cc.s
+.PHONY : simple_check.cc.s
 
 # Help Target
 help:
@@ -201,12 +197,13 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... test"
-	@echo "... compile_test_executables"
-	@echo "... tests.template.debug.test"
-	@echo "... tests.template.debug"
-	@echo "... template.o"
-	@echo "... template.i"
-	@echo "... template.s"
+	@echo "... gtests.g"
+	@echo "... gtest_main.o"
+	@echo "... gtest_main.i"
+	@echo "... gtest_main.s"
+	@echo "... simple_check.o"
+	@echo "... simple_check.i"
+	@echo "... simple_check.s"
 .PHONY : help
 
 

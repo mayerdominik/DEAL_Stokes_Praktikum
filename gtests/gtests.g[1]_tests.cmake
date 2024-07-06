@@ -1,0 +1,7 @@
+add_test( [==[SimpleClass/std::integral_constant<unsigned int, 1u>.CheckSize]==] /home/dome/projects/DEAL_Stokes_Praktikum/gtests/gtests.g [==[--gtest_filter=SimpleClass/0.CheckSize]==] --gtest_also_run_disabled_tests)
+set_tests_properties( [==[SimpleClass/std::integral_constant<unsigned int, 1u>.CheckSize]==] PROPERTIES WORKING_DIRECTORY /home/dome/projects/DEAL_Stokes_Praktikum/gtests SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
+add_test( [==[SimpleClass/std::integral_constant<unsigned int, 2u>.CheckSize]==] /home/dome/projects/DEAL_Stokes_Praktikum/gtests/gtests.g [==[--gtest_filter=SimpleClass/1.CheckSize]==] --gtest_also_run_disabled_tests)
+set_tests_properties( [==[SimpleClass/std::integral_constant<unsigned int, 2u>.CheckSize]==] PROPERTIES WORKING_DIRECTORY /home/dome/projects/DEAL_Stokes_Praktikum/gtests SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
+add_test( [==[SimpleClass/std::integral_constant<unsigned int, 3u>.CheckSize]==] /home/dome/projects/DEAL_Stokes_Praktikum/gtests/gtests.g [==[--gtest_filter=SimpleClass/2.CheckSize]==] --gtest_also_run_disabled_tests)
+set_tests_properties( [==[SimpleClass/std::integral_constant<unsigned int, 3u>.CheckSize]==] PROPERTIES WORKING_DIRECTORY /home/dome/projects/DEAL_Stokes_Praktikum/gtests SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
+set( gtests.g_TESTS [==[SimpleClass/std::integral_constant<unsigned int, 1u>.CheckSize]==] [==[SimpleClass/std::integral_constant<unsigned int, 2u>.CheckSize]==] [==[SimpleClass/std::integral_constant<unsigned int, 3u>.CheckSize]==])

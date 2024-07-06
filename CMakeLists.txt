@@ -51,8 +51,12 @@ INCLUDE_DIRECTORIES(include)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
 
+# Specify the path to deal.II
+set(deal.II_DIR /home/dome/dealii-9.5.2)
+
 FIND_PACKAGE(deal.II 9.2 REQUIRED
 HINTS ${deal.II_DIR} ${DEAL_II_DIR} ../ ../../ $ENV{DEAL_II_DIR})
+
 DEAL_II_INITIALIZE_CACHED_VARIABLES()
 
 
@@ -106,6 +110,12 @@ ENDFOREACH()
 IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests AND ENABLE_DEAL_II_APP_TESTING)
   ADD_SUBDIRECTORY(tests)
 ENDIF()
+
+# Set GTest include directory
+set(GTEST_INCLUDE_DIR /usr/src/gtest/include)
+
+# Set GTest library files
+set(GTEST_LIBRARY /usr/src/gtest/lib/libgtest.a /usr/src/gtest/lib/libgtest_main.a)
 
 # Google test style testing
 IF(ENABLE_GOOGLE_TESTING)

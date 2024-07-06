@@ -1,0 +1,5 @@
+if(EXISTS "/home/dome/projects/DEAL_Stokes_Praktikum/gtests/gtests.g[1]_tests.cmake")
+  include("/home/dome/projects/DEAL_Stokes_Praktikum/gtests/gtests.g[1]_tests.cmake")
+else()
+  add_test(gtests.g_NOT_BUILT gtests.g_NOT_BUILT)
+endif()

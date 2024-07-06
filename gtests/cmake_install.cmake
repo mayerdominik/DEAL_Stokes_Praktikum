@@ -1,4 +1,4 @@
-# Install script for directory: /home/dome/projects/DEAL_Stokes_Praktikum/tests
+# Install script for directory: /home/dome/projects/DEAL_Stokes_Praktikum/gtests
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

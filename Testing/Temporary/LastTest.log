@@ -1,0 +1,22 @@
+Start testing: Jul 06 15:15 CEST
+----------------------------------------------------------
+1/1 Testing: tests/template.debug
+1/1 Test: tests/template.debug
+Command: "/usr/bin/cmake" "-DTRGT=tests.template.debug.test" "-DTEST=tests/template.debug" "-DEXPECT=PASSED" "-DBINARY_DIR=/home/dome/projects/DEAL_Stokes_Praktikum" "-P" "/usr/local/share/deal.II/scripts/run_test.cmake"
+Directory: /home/dome/projects/DEAL_Stokes_Praktikum/tests/template.debug
+"tests/template.debug" start time: Jul 06 15:15 CEST
+Output:
+----------------------------------------------------------
+[0mTest tests/template.debug: PASSED[0m
+[0m===============================   OUTPUT BEGIN  ===============================[0m
+[0mtests/template.debug: PASSED.[0m
+[0m===============================    OUTPUT END   ===============================[0m
+<end of output>
+Test time =   0.25 sec
+----------------------------------------------------------
+Test Passed.
+"tests/template.debug" end time: Jul 06 15:15 CEST
+"tests/template.debug" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Jul 06 15:15 CEST

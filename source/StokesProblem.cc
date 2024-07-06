@@ -683,7 +683,7 @@ namespace project {
                     face->set_all_boundary_ids(1);*/
 
 
-        triangulation.refine_global(4 - dim);
+        triangulation.refine_global(7 - dim);
 
         for (unsigned int refinement_cycle = 0; refinement_cycle < 1;
              ++refinement_cycle)
