@@ -16,12 +16,15 @@ namespace project {
 		values[0] = -std::exp(R_x * (-std::sqrt(25.0 + 4 * pi2) + 5.0)) *
 			  std::cos(2 * R_y * pi) + 1;
 			  
+		//Paraview Calculator: 
+		// X-Coordinate: -exp(coordsX*(-sqrt(25.0 + 4 * 3.1415*3.1415) + 5.0)) * cos(2*coordsY * 3.1415) + 1
+		//Y-Coordinate: 0.5 * (-sqrt(25.0 + 4 * 3.1415 * 3.1415) + 5.0) *exp(coordsX * (-sqrt(25.0 + 4 * 3.1415 * 3.1415) + 5.0)) * sin(2 * coordsY * 3.1415) / 3.1415
 		values[1] = (1.0L / 2.0L) * (-std::sqrt(25.0 + 4 * pi2) + 5.0) *
 			std::exp(R_x * (-std::sqrt(25.0 + 4 * pi2) + 5.0)) *
 			std::sin(2 * R_y * pi) / pi;
 
 		
-		values[dim] =
+		/*values[dim] =
 		-1.0L / 2.0L * std::exp(R_x * (-2 * std::sqrt(25.0 + 4 * pi2) + 10.0)) -
 		2.0 *
 		(-6538034.74494422 +
@@ -35,7 +38,7 @@ namespace project {
 		3269017.37247211 * std::exp(-3 * std::sqrt(25.0 + 4 * pi2))) /
 		(-8 * std::sqrt(25.0 + 4 * pi2) + 40.0) +
 		0.00336897349954273 * std::exp(1.0 * std::sqrt(25.0 + 4 * pi2)) /
-		(-10.0 + 2.0 * std::sqrt(25.0 + 4 * pi2));
+		(-10.0 + 2.0 * std::sqrt(25.0 + 4 * pi2));*/
 
 	}
 

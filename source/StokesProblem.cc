@@ -7,6 +7,8 @@
 #include "BoundaryValues.h"
 #include "ExactSolution.h"
 
+#include<deal.II/lac/solver_gmres.h>
+
 namespace project {
     using namespace dealii;
 
@@ -278,7 +280,7 @@ namespace project {
  	int count = 0;
     for (const auto &cell : dof_handler.active_cell_iterators() | IteratorFilters::ActiveFEIndexEqualTo(ActiveFEIndex::lagrange))
       {
- 	std::cout << "Cell number " << count++ << std::endl; 
+ 	//std::cout << "Cell number " << count++ << std::endl; 
         local_matrix                = 0;
         local_preconditioner_matrix = 0;
         local_rhs                   = 0;
@@ -363,7 +365,7 @@ namespace project {
                 const Point<dim> &point = surface_fe_values->quadrature_point(q);
                 const Tensor<1, dim> &normal = surface_fe_values->normal_vector(q);
                 
-                std::cout << point << std::endl;
+                //std::cout << point << std::endl;
                 
                 //std::vector<double> b();
                 Vector<double> b(dim + 1);
@@ -375,10 +377,10 @@ namespace project {
 		
                 for(int i = 0; i < dim; i++){
                 	v[i] = b[i];
-                	std::cout << v[i] << std::endl;
+                	//std::cout << v[i] << std::endl;
                 }
                 
-                std::cout << "surface_fe_values "<< count << std::endl;
+               // std::cout << "surface_fe_values "<< count << std::endl;
                 
 		dealii::ArrayView<double> b1(v);
 		dealii::Tensor<1, dim> g(b1);
@@ -425,7 +427,7 @@ namespace project {
                                                local_dof_indices,
                                                system_matrix,
                                                system_rhs);
-                                               std::cout<<"const" <<std::endl;
+                                               //std::cout<<"const" <<std::endl;
         constraints.distribute_local_to_global(local_preconditioner_matrix,
                                                local_dof_indices,
                                                preconditioner_matrix);
@@ -473,7 +475,7 @@ namespace project {
                   double h = cell_side_length;
                   
                   if (cell->face(f)->vertex(0).norm() >= 0.5 || cell->face(f)->vertex(1).norm() >= 0.5) {
-                  	std::cout << "                  Intersecting Face"  << std::endl;
+                  	//std::cout << "                  Intersecting Face"  << std::endl;
                   	h = cell_side_length*cell_side_length*cell_side_length;
                   }
                   
@@ -494,7 +496,7 @@ namespace project {
                           fe_interface_values[velocities].jump_in_gradients(j, q)) *
                           fe_interface_values.JxW(q) 
                           +   
-                           0.5 * ghost_parameter * h * (
+                          0.5 * ghost_parameter * h * (
                           normal * (normal * fe_interface_values[velocities].jump_in_hessians(i, q))) * 
                           (
                           normal * (normal * fe_interface_values[velocities].jump_in_hessians(j, q))) *
@@ -511,9 +513,9 @@ namespace project {
            //                        local_stabilization);
             }
       }
- std::cout << system_matrix.block(0,0).n() << std::endl;
-  std::cout << system_matrix.block(0,0).n_actually_nonzero_elements() << std::endl;
-    std::cout << "Computing preconditioner..." << std::endl << std::flush;
+ //std::cout << system_matrix.block(0,0).n() << std::endl;
+//  std::cout << system_matrix.block(0,0).n_actually_nonzero_elements() << std::endl;
+  //  std::cout << "Computing preconditioner..." << std::endl << std::flush;
  
     A_preconditioner =
       std::make_shared<typename InnerPreconditioner<dim>::type>();
@@ -522,7 +524,7 @@ namespace project {
       system_matrix.block(0, 0),
       typename InnerPreconditioner<dim>::type::AdditionalData());
       
-      std::cout << "done prec" << std::endl;
+     // std::cout << "done prec" << std::endl;
   }
  
  
@@ -533,6 +535,13 @@ namespace project {
     //MinRes
     //BlockSolver 
     
+    {
+    SolverGMRES<Vector<double>> solver;
+    solver.solve(system_matrix, solution, system_rhs);
+    
+    
+    return;
+    }
         const InverseMatrix<SparseMatrix<double>,
                 typename InnerPreconditioner<dim>::type>
                 A_inverse(system_matrix.block(0, 0), *A_preconditioner);
@@ -547,7 +556,7 @@ namespace project {
             SchurComplement<typename InnerPreconditioner<dim>::type> schur_complement(
                     system_matrix, A_inverse);
 
-            SolverControl            solver_control(solution.block(1).size() + 1550,
+            SolverControl            solver_control(solution.block(1).size(),
                                                     1e-6 * schur_rhs.l2_norm());
             SolverCG<Vector<double>> cg(solver_control);
 
@@ -562,9 +571,9 @@ namespace project {
 
             constraints.distribute(solution);
 
-            std::cout << "  " << solver_control.last_step()
-                      << " outer CG Schur complement iterations for pressure"
-                      << std::endl;
+           // std::cout << "  " << solver_control.last_step()
+           //           << " outer CG Schur complement iterations for pressure"
+           //           << std::endl;
         }
 
         {
@@ -577,7 +586,54 @@ namespace project {
             constraints.distribute(solution);
             
             
-             const ComponentSelectFunction<dim> velocity_mask(std::make_pair(0, dim), dim + 1);
+        const QGauss<1> quadrature_1D(3);
+            
+        NonMatching::RegionUpdateFlags region_update_flags;
+        region_update_flags.inside = update_values | update_JxW_values | update_quadrature_points;
+      	    
+      	     
+        NonMatching::FEValues<dim> non_matching_fe_values(fe_collection,
+                                                        quadrature_1D,
+                                                        region_update_flags,
+                                                        mesh_classifier,
+                                                        level_set_dof_handler,
+                                                        level_set);
+	double error_L2_squared = 0;
+	ExactSolution<dim> analytical_solution;
+	const FEValuesExtractors::Vector velocities(0);
+                            
+	for (const auto &cell : dof_handler.active_cell_iterators() |IteratorFilters::ActiveFEIndexEqualTo(ActiveFEIndex::lagrange))
+        {
+          non_matching_fe_values.reinit(cell);
+  
+          const std::optional<FEValues<dim>> &fe_values =
+            non_matching_fe_values.get_inside_fe_values();
+	  
+		  if (fe_values)
+		    {
+		   // std::cout << solution.block(0).size() << " " << fe_values->n_quadrature_points << std::endl;
+		      std::vector<Tensor<1,dim>> solution_values(fe_values->n_quadrature_points);
+		      (*fe_values)[velocities].get_function_values(solution, solution_values);
+	  
+		      for (const unsigned int q : fe_values->quadrature_point_indices())
+		        {
+		          const Point<dim> &point = fe_values->quadrature_point(q);
+		          Vector<double> s(dim);
+		          analytical_solution.vector_value(point, s);
+		          Tensor<1,dim> s1;
+		          for(int i = 0; i < dim; i++){
+		          	s1[i] = s[i];
+		          }
+		          s1 -= solution_values.at(q);
+		          const double      error_at_point = (s1).norm();
+		          error_L2_squared +=
+		            Utilities::fixed_power<2>(error_at_point) * fe_values->JxW(q);
+		        }
+		    }
+		}
+  
+            
+            /*const ComponentSelectFunction<dim> velocity_mask(std::make_pair(0, dim), dim + 1);
             
             Vector<float> difference_per_cell(triangulation.n_active_cells());
             
@@ -591,8 +647,8 @@ namespace project {
 		                                
 	    const double L2_error = VectorTools::compute_global_error(triangulation,
                                           difference_per_cell,
-                                          VectorTools::L2_norm);
-		std::cout << "L2Error for velocity: " << L2_error << std::endl;
+                                          VectorTools::L2_norm);*/
+	std::cout << "L2Error for velocity: " << (error_L2_squared) << std::endl;
         }
     }
 
@@ -686,16 +742,18 @@ namespace project {
                     face->set_all_boundary_ids(1);*/
 
 
-        triangulation.refine_global(8 - dim);
+        triangulation.refine_global(3 - dim);
 
-        for (unsigned int refinement_cycle = 0; refinement_cycle < 1;
+        for (unsigned int refinement_cycle = 0; refinement_cycle < 6;
              ++refinement_cycle)
         {
             std::cout << "Refinement cycle " << refinement_cycle << std::endl;
 
-            if (refinement_cycle > 0)
-                refine_mesh();
-
+            //if (refinement_cycle > 0)
+                //refine_mesh();
+                
+            triangulation.refine_global(1);
+	
             setup_dofs();
 
             std::cout << "   Assembling..." << std::endl << std::flush;
