@@ -535,13 +535,13 @@ namespace project {
     //MinRes
     //BlockSolver 
     
-    {
+    /*{
     SolverGMRES<Vector<double>> solver;
     solver.solve(system_matrix, solution, system_rhs);
     
     
     return;
-    }
+    }*/
         const InverseMatrix<SparseMatrix<double>,
                 typename InnerPreconditioner<dim>::type>
                 A_inverse(system_matrix.block(0, 0), *A_preconditioner);
@@ -556,7 +556,7 @@ namespace project {
             SchurComplement<typename InnerPreconditioner<dim>::type> schur_complement(
                     system_matrix, A_inverse);
 
-            SolverControl            solver_control(solution.block(1).size(),
+            SolverControl            solver_control(solution.block(1).size() + 1500,
                                                     1e-6 * schur_rhs.l2_norm());
             SolverCG<Vector<double>> cg(solver_control);
 
@@ -602,8 +602,9 @@ namespace project {
 	ExactSolution<dim> analytical_solution;
 	const FEValuesExtractors::Vector velocities(0);
                             
-	for (const auto &cell : dof_handler.active_cell_iterators() |IteratorFilters::ActiveFEIndexEqualTo(ActiveFEIndex::lagrange))
+	for (const auto &cell : dof_handler.active_cell_iterators() | IteratorFilters::ActiveFEIndexEqualTo(ActiveFEIndex::lagrange))
         {
+
           non_matching_fe_values.reinit(cell);
   
           const std::optional<FEValues<dim>> &fe_values =
@@ -627,7 +628,7 @@ namespace project {
 		          s1 -= solution_values.at(q);
 		          const double      error_at_point = (s1).norm();
 		          error_L2_squared +=
-		            Utilities::fixed_power<2>(error_at_point) * fe_values->JxW(q);
+		             Utilities::fixed_power<2>(error_at_point) * fe_values->JxW(q);
 		        }
 		    }
 		}
@@ -648,7 +649,7 @@ namespace project {
 	    const double L2_error = VectorTools::compute_global_error(triangulation,
                                           difference_per_cell,
                                           VectorTools::L2_norm);*/
-	std::cout << "L2Error for velocity: " << (error_L2_squared) << std::endl;
+	std::cout << "L2Error for velocity: " << std::sqrt(error_L2_squared) << std::endl;
         }
     }
 
