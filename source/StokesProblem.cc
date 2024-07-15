@@ -5,6 +5,11 @@
 #include "SchurComplement.h"
 #include "RightHandSide.h"
 #include "BoundaryValues.h"
+<<<<<<< Updated upstream
+=======
+#include <vector>
+#include "ExactSolution.h"
+>>>>>>> Stashed changes
 
 
 
@@ -564,6 +569,86 @@ namespace project {
             A_inverse.vmult(solution.block(0), tmp);
 
             constraints.distribute(solution);
+<<<<<<< Updated upstream
+=======
+            
+            
+        const QGauss<1> quadrature_1D(3);
+            
+        NonMatching::RegionUpdateFlags region_update_flags;
+        region_update_flags.inside = update_values | update_JxW_values | update_quadrature_points;
+      	    
+      	     
+        NonMatching::FEValues<dim> non_matching_fe_values(fe_collection,
+                                                        quadrature_1D,
+                                                        region_update_flags,
+                                                        mesh_classifier,
+                                                        level_set_dof_handler,
+                                                        level_set);
+	double error_L2_squared = 0;
+	ExactSolution<dim> analytical_solution;
+	const FEValuesExtractors::Vector velocities(0);
+                            
+	for (const auto &cell : dof_handler.active_cell_iterators() | IteratorFilters::ActiveFEIndexEqualTo(ActiveFEIndex::lagrange))
+        {
+
+          non_matching_fe_values.reinit(cell);
+  
+          const std::optional<FEValues<dim>> &fe_values =
+            non_matching_fe_values.get_inside_fe_values();
+	  
+		  if (fe_values)
+		    {
+		   // std::cout << solution.block(0).size() << " " << fe_values->n_quadrature_points << std::endl;
+		      std::vector<Tensor<1,dim>> solution_values(fe_values->n_quadrature_points);
+		      (*fe_values)[velocities].get_function_values(solution, solution_values);
+
+
+              for (const unsigned int q : fe_values->quadrature_point_indices())
+		        {
+		          const Point<dim> &point = fe_values->quadrature_point(q);
+		          Vector<double> s(dim);
+                  Vector<double> dbg(dim);
+		          analytical_solution.vector_value(point, s);
+                  analytical_solution.vector_value(point, dbg);
+		          Tensor<1,dim> s1;
+		          for(int i = 0; i < dim; i++){
+		          	s1[i] = s[i];
+		          }
+		          s1 -= solution_values.at(q);
+
+
+                  const double      error_at_point = (s1).norm();
+                  double dbg_quadrature_point_radius = std::sqrt(point[0]*point[0] + point[1]*point[1]);
+
+
+                  //cout << point[0] << " " << point[1] << " " << error_at_point << " \n";
+
+
+		          error_L2_squared +=
+		             Utilities::fixed_power<2>(error_at_point) * fe_values->JxW(q);
+		        }
+		    }
+		}
+  
+            
+            /*const ComponentSelectFunction<dim> velocity_mask(std::make_pair(0, dim), dim + 1);
+            
+            Vector<float> difference_per_cell(triangulation.n_active_cells());
+            
+            VectorTools::integrate_difference(dof_handler,
+		                                solution,
+		                                ExactSolution<dim>(),
+		                                difference_per_cell,
+		                                QGauss<dim>(2),
+		                                VectorTools::L2_norm, 
+		                                &velocity_mask);
+		                                
+	    const double L2_error = VectorTools::compute_global_error(triangulation,
+                                          difference_per_cell,
+                                          VectorTools::L2_norm);*/
+	std::cout << "L2Error for velocity: " << std::sqrt(error_L2_squared) << std::endl;
+>>>>>>> Stashed changes
         }
     }
 
@@ -583,6 +668,9 @@ namespace project {
         data_component_interpretation.push_back(
                 DataComponentInterpretation::component_is_scalar);
 
+
+
+
         DataOut<dim> data_out;
         data_out.attach_dof_handler(dof_handler);
         data_out.add_data_vector(solution,
@@ -590,7 +678,13 @@ namespace project {
                                  DataOut<dim>::type_dof_data,
                                  data_component_interpretation);
 
+<<<<<<< Updated upstream
 	data_out.set_cell_selection(
+=======
+
+
+        data_out.set_cell_selection(
+>>>>>>> Stashed changes
 	      [this](const typename Triangulation<dim>::cell_iterator &cell) {
 		return cell->is_active() &&
 		       mesh_classifier.location_to_level_set(cell) !=
@@ -656,7 +750,11 @@ namespace project {
                     face->set_all_boundary_ids(1);
 
 
+<<<<<<< Updated upstream
         triangulation.refine_global(1);
+=======
+        triangulation.refine_global(6 - dim);
+>>>>>>> Stashed changes
 
         double n_refinements = 5;
 

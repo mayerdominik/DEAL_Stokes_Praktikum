@@ -19,6 +19,47 @@ namespace project{
             values[c] = RightHandSide<dim>::value(vp[c]);
         }
     }
+<<<<<<< Updated upstream
+=======
+    
+  template <int dim>
+  Tensor<1, dim> RightHandSide<dim>::value(const Point<dim> &p) const
+  {
+    Tensor<1, dim>  values;
+    const double R_x = p[0];
+    const double R_y = p[1];
+ 
+    constexpr double pi  = numbers::PI;
+    constexpr double pi2 = numbers::PI * numbers::PI;
+ 
+    values[0] = -1.0L / 2.0L * (-2 * std::sqrt(25.0 + 4 * pi2) + 10.0) *
+                  std::exp(R_x * (-2 * std::sqrt(25.0 + 4 * pi2) + 10.0)) -
+                0.4 * pi2 * std::exp(R_x * (-std::sqrt(25.0 + 4 * pi2) + 5.0)) *
+                  std::cos(2 * R_y * pi) +
+                0.1 *
+                  Utilities::fixed_power<2>(-std::sqrt(25.0 + 4 * pi2) + 5.0) *
+                  std::exp(R_x * (-std::sqrt(25.0 + 4 * pi2) + 5.0)) *
+                  std::cos(2 * R_y * pi);
+                  
+
+    //values[1] = 
+    values[1] = 0.2 * pi * (-std::sqrt(25.0 + 4 * pi2) + 5.0) *
+                  std::exp(R_x * (-std::sqrt(25.0 + 4 * pi2) + 5.0)) *
+                  std::sin(2 * R_y * pi) -
+                0.05 *
+                  Utilities::fixed_power<3>(-std::sqrt(25.0 + 4 * pi2) + 5.0) *
+                  std::exp(R_x * (-std::sqrt(25.0 + 4 * pi2) + 5.0)) *
+                  std::sin(2 * R_y * pi) / pi;
+                  
+    //values[0] = -128 * R_y - 6 * 64 * R_y;
+    //values[1] = 128 * R_x + 6 * 64 * R_x;
+			
+    
+    //values[dim] = 0;
+    return values;
+  }
+ 
+>>>>>>> Stashed changes
 
     template class RightHandSide<2>;
     template class RightHandSide<3>;
