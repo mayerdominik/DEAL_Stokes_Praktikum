@@ -100,6 +100,8 @@ namespace project {
     const FE_Q<dim> fe_level_set;
     DoFHandler<dim> level_set_dof_handler;
     Vector<double>  level_set;
+    double radius;
+    double CurrentL2Error;
     
     NonMatching::MeshClassifier<dim> mesh_classifier;
 

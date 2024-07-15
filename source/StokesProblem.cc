@@ -22,6 +22,9 @@ namespace project {
     , level_set_dof_handler(triangulation)
     , fe_level_set(degree)
     , mesh_classifier(level_set_dof_handler, level_set)
+      , radius(1.5),
+      CurrentL2Error(0)
+
   {}
   
    template<int dim>
@@ -64,7 +67,7 @@ namespace project {
     level_set.reinit(level_set_dof_handler.n_dofs());
  
     Point<dim> center(0,0);
-    const Functions::SignedDistance::Sphere<dim> signed_distance_sphere(center,0.5);
+    const Functions::SignedDistance::Sphere<dim> signed_distance_sphere(center,radius);
     VectorTools::interpolate(level_set_dof_handler,
                              signed_distance_sphere,
                              level_set);
@@ -474,7 +477,7 @@ namespace project {
                   const Tensor<1, dim> normal = fe_interface_values.normal(q);
                   double h = cell_side_length;
                   
-                  if (cell->face(f)->vertex(0).norm() >= 0.5 || cell->face(f)->vertex(1).norm() >= 0.5) {
+                  if (cell->face(f)->vertex(0).norm() >= radius || cell->face(f)->vertex(1).norm() >= radius) {
                   	//std::cout << "                  Intersecting Face"  << std::endl;
                   	h = cell_side_length*cell_side_length*cell_side_length;
                   }
@@ -658,7 +661,7 @@ namespace project {
             VectorTools::integrate_difference(dof_handler,
 		                                solution,
 		                                ExactSolution<dim>(),
-		                                difference_per_cell,
+		                        f        difference_per_cell,
 		                                QGauss<dim>(2),
 		                                VectorTools::L2_norm, 
 		                                &velocity_mask);
@@ -666,7 +669,8 @@ namespace project {
 	    const double L2_error = VectorTools::compute_global_error(triangulation,
                                           difference_per_cell,
                                           VectorTools::L2_norm);*/
-	std::cout << "L2Error for velocity: " << std::sqrt(error_L2_squared) << std::endl;
+	std::cout << "L2Error for velocity: " << error_L2_squared << std::endl;
+  CurrentL2Error = error_L2_squared;
         }
     }
 
@@ -736,6 +740,7 @@ namespace project {
     void StokesProblem<dim>::run()
     {
         {
+
             std::vector<unsigned int> subdivisions(dim, 1);
             subdivisions[0] = 4;
 
@@ -747,7 +752,7 @@ namespace project {
                                           Point<dim>(2, 0) :    // 2d case
                                           Point<dim>(2, 1, 0)); // 3d case
 
-      	GridGenerator::hyper_cube(triangulation, -1.21,1.21);
+      	GridGenerator::hyper_cube(triangulation, -2.5, 2.5);
            /* GridGenerator::subdivided_hyper_rectangle(triangulation,
                                                       subdivisions,
                                                       bottom_left,
@@ -759,7 +764,8 @@ namespace project {
                 if (face->center()[dim - 1] >= 1.20)
                     face->set_all_boundary_ids(1);*/
 
-
+        std::ofstream dbg_convergence;
+        dbg_convergence.open("/home/f/Documents/DEAL_Stokes_Praktikum/L2conv.txt");
         triangulation.refine_global(3 - dim);
 
         for (unsigned int refinement_cycle = 0; refinement_cycle < 6;
@@ -783,6 +789,8 @@ namespace project {
             output_results(refinement_cycle);
 
             std::cout << std::endl;
+
+            dbg_convergence << CurrentL2Error << "\n";
         }
     }
 
