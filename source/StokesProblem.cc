@@ -6,7 +6,7 @@
 #include "RightHandSide.h"
 #include "BoundaryValues.h"
 #include "ExactSolution.h"
-
+#include <fstream>
 #include<deal.II/lac/solver_gmres.h>
 
 namespace project {
@@ -601,8 +601,18 @@ namespace project {
 	double error_L2_squared = 0;
 	ExactSolution<dim> analytical_solution;
 	const FEValuesExtractors::Vector velocities(0);
-                            
-	for (const auto &cell : dof_handler.active_cell_iterators() | IteratorFilters::ActiveFEIndexEqualTo(ActiveFEIndex::lagrange))
+  std::ofstream                    dbg_file_rel_err;
+  dbg_file_rel_err.open("/home/f/Documents/DEAL_Stokes_Praktikum/rel_error_at_points.txt");
+  std::ofstream dbg_file_abs_err;
+  dbg_file_abs_err.open("/home/f/Documents/DEAL_Stokes_Praktikum/abs_error_at_points.txt");
+  std::ofstream dbg_file_aprox_sol;
+  dbg_file_aprox_sol.open("/home/f/Documents/DEAL_Stokes_Praktikum/aprox_sol_at_points.txt");
+
+  std::ofstream dbg_file_true_sol;
+  dbg_file_true_sol.open("/home/f/Documents/DEAL_Stokes_Praktikum/sol_at_points.txt");
+
+
+  for (const auto &cell : dof_handler.active_cell_iterators() | IteratorFilters::ActiveFEIndexEqualTo(ActiveFEIndex::lagrange))
         {
 
           non_matching_fe_values.reinit(cell);
@@ -615,7 +625,7 @@ namespace project {
 		   // std::cout << solution.block(0).size() << " " << fe_values->n_quadrature_points << std::endl;
 		      std::vector<Tensor<1,dim>> solution_values(fe_values->n_quadrature_points);
 		      (*fe_values)[velocities].get_function_values(solution, solution_values);
-	  
+
 		      for (const unsigned int q : fe_values->quadrature_point_indices())
 		        {
 		          const Point<dim> &point = fe_values->quadrature_point(q);
@@ -627,6 +637,13 @@ namespace project {
 		          }
 		          s1 -= solution_values.at(q);
 		          const double      error_at_point = (s1).norm();
+              double rel_error = error_at_point / s.l2_norm();
+
+
+              dbg_file_rel_err << rel_error << ";" << point[0] << ";" << point[1] << "\n";
+              dbg_file_abs_err << error_at_point << ";" << point[0] << ";" << point[1] << "\n";
+              dbg_file_aprox_sol << solution_values.at(q).norm() << ";" << point[0] << ";" << point[1] << "\n";
+              dbg_file_true_sol << s.l2_norm() << ";" << point[0] << ";" << point[1] << "\n";
 		          error_L2_squared +=
 		             Utilities::fixed_power<2>(error_at_point) * fe_values->JxW(q);
 		        }

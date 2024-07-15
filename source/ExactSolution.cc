@@ -13,18 +13,18 @@ namespace project {
 		constexpr double pi  = numbers::PI;
 		constexpr double pi2 = numbers::PI * numbers::PI;
 
-		/*values[0] = -std::exp(R_x * (-std::sqrt(25.0 + 4 * pi2) + 5.0)) *
+		values[0] = -std::exp(R_x * (-std::sqrt(25.0 + 4 * pi2) + 5.0)) *
 			  std::cos(2 * R_y * pi) + 1;
 			  
 		values[1] = (1.0L / 2.0L) * (-std::sqrt(25.0 + 4 * pi2) + 5.0) *
 			std::exp(R_x * (-std::sqrt(25.0 + 4 * pi2) + 5.0)) *
-			std::sin(2 * R_y * pi) / pi;*/
+			std::sin(2 * R_y * pi) / pi;
 			
 			//(-2 * (1-4*(coordsX*coordsX + coordsY*coordsY)) * 8 * coordsY )- velocity_X
 			//
 			  
-		values[0] = -2 * (1 - 4 * (R_x * R_x + R_y * R_y)) * 8 * R_y;
-		values[1] = 2 * (1 - 4 * (R_x * R_x + R_y * R_y)) * 8 * R_x;
+		//values[0] = -2 * (1 - 4 * (R_x * R_x + R_y * R_y)) * 8 * R_y;
+		//values[1] = 2 * (1 - 4 * (R_x * R_x + R_y * R_y)) * 8 * R_x;
 		
 		// x = d/dy Phi
 		// y = -d/dx Phi
