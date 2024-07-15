@@ -21,9 +21,10 @@ namespace project {
 			std::sin(2 * R_y * pi) / pi;*/
 			
 			//(-2 * (1-4*(coordsX*coordsX + coordsY*coordsY)) * 8 * coordsY )- velocity_X
-			//
+			//(2 * (1-4*(coordsX*coordsX + coordsY*coordsY)) * 8 * coordsX )- velocity_Y
 			  
-		values[0] = -2 * (1 - 4 * (R_x * R_x + R_y * R_y)) * 8 * R_y;
+			  
+		values[0] = - 2 * (1 - 4 * (R_x * R_x + R_y * R_y)) * 8 * R_y;
 		values[1] = 2 * (1 - 4 * (R_x * R_x + R_y * R_y)) * 8 * R_x;
 		
 		// x = d/dy Phi

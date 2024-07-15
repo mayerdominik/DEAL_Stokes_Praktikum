@@ -30,7 +30,7 @@ namespace project{
     constexpr double pi  = numbers::PI;
     constexpr double pi2 = numbers::PI * numbers::PI;
  
-   /* values[0] = -1.0L / 2.0L * (-2 * std::sqrt(25.0 + 4 * pi2) + 10.0) *
+    values[0] = -1.0L / 2.0L * (-2 * std::sqrt(25.0 + 4 * pi2) + 10.0) *
                   std::exp(R_x * (-2 * std::sqrt(25.0 + 4 * pi2) + 10.0)) -
                 0.4 * pi2 * std::exp(R_x * (-std::sqrt(25.0 + 4 * pi2) + 5.0)) *
                   std::cos(2 * R_y * pi) +
@@ -47,7 +47,8 @@ namespace project{
                 0.05 *
                   Utilities::fixed_power<3>(-std::sqrt(25.0 + 4 * pi2) + 5.0) *
                   std::exp(R_x * (-std::sqrt(25.0 + 4 * pi2) + 5.0)) *
-                  std::sin(2 * R_y * pi) / pi;*/
+                  std::sin(2 * R_y * pi) / pi;
+                  
                   
     values[0] = -128 * R_y - 6 * 64 * R_y;		
     values[1] = 128 * R_x + 6 * 64 * R_x;

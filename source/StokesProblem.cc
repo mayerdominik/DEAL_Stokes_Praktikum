@@ -8,6 +8,7 @@
 #include "ExactSolution.h"
 
 #include<deal.II/lac/solver_gmres.h>
+#include <deal.II/lac/solver_minres.h>
 
 namespace project {
     using namespace dealii;
@@ -64,7 +65,7 @@ namespace project {
     level_set.reinit(level_set_dof_handler.n_dofs());
  
     Point<dim> center(0,0);
-    const Functions::SignedDistance::Sphere<dim> signed_distance_sphere(center,0.5);
+    const Functions::SignedDistance::Sphere<dim> signed_distance_sphere(center,0.75);
     VectorTools::interpolate(level_set_dof_handler,
                              signed_distance_sphere,
                              level_set);
@@ -97,7 +98,7 @@ namespace project {
       constraints.clear();
  
       const FEValuesExtractors::Vector velocities(0);
-      /*DoFTools::make_hanging_node_constraints(dof_handler, constraints);*/
+      DoFTools::make_hanging_node_constraints(dof_handler, constraints);
       /*VectorTools::interpolate_boundary_values(dof_handler,
                                                1,
                                                BoundaryValues<dim>(),
@@ -346,13 +347,9 @@ namespace project {
             {
               local_matrix(i, j) = local_matrix(j, i);
               local_preconditioner_matrix(i, j) =
-                local_preconditioner_matrix(j, i);
-                
-                
+                local_preconditioner_matrix(j, i);   
             }
 	
-
-         // std::cout << "t" << std::endl;
           BoundaryValues<dim> boundary_condition;
           
           const std::optional<NonMatching::FEImmersedSurfaceValues<dim>> &surface_fe_values = non_matching_fe_values.get_surface_fe_values();
@@ -392,20 +389,20 @@ namespace project {
                          surface_fe_values->dof_indices())
                       {
                         local_matrix(i, j) +=
-                          (-normal * (*surface_fe_values)[velocities].gradient(i, q) *
-                             (*surface_fe_values)[velocities].value(j, q) +
+                            (-normal * (*surface_fe_values)[velocities].gradient(i, q) *
+                              (*surface_fe_values)[velocities].value(j, q)
                              
-                           -normal * (*surface_fe_values)[velocities].gradient(j, q) *
-                             (*surface_fe_values)[velocities].value(i, q) +
+                             -normal * (*surface_fe_values)[velocities].gradient(j, q) *
+                              (*surface_fe_values)[velocities].value(i, q) 
+
+                             + nitsche_parameter / cell_side_length *
+                              (*surface_fe_values)[velocities].value(i, q) *
+                              (*surface_fe_values)[velocities].value(j, q)
                              
-                           nitsche_parameter / cell_side_length *
-                             (*surface_fe_values)[velocities].value(i, q) *
-                             (*surface_fe_values)[velocities].value(j, q)
-                             
-                             +normal *  (*surface_fe_values)[velocities].value(j, q) *
+                             + normal * (*surface_fe_values)[velocities].value(j, q) *
                               (*surface_fe_values)[pressure].value(i, q)
                               
-                             + normal *  (*surface_fe_values)[velocities].value(i, q) *
+                             + normal * (*surface_fe_values)[velocities].value(i, q) *
                               (*surface_fe_values)[pressure].value(j, q)
                              ) *
                           surface_fe_values->JxW(q);
@@ -474,9 +471,9 @@ namespace project {
                   const Tensor<1, dim> normal = fe_interface_values.normal(q);
                   double h = cell_side_length;
                   
-                  if (cell->face(f)->vertex(0).norm() >= 0.5 || cell->face(f)->vertex(1).norm() >= 0.5) {
+                  if (cell->face(f)->vertex(0).norm() >= 0.75 || cell->face(f)->vertex(1).norm() >= 0.75) {
                   	//std::cout << "                  Intersecting Face"  << std::endl;
-                  	h = cell_side_length*cell_side_length*cell_side_length;
+                  	h = cell_side_length * cell_side_length * cell_side_length;
                   }
                   
                   for (unsigned int i = 0; i < n_interface_dofs; ++i)
@@ -536,11 +533,23 @@ namespace project {
     //BlockSolver 
     
     /*{
-    SolverGMRES<Vector<double>> solver;
-    solver.solve(system_matrix, solution, system_rhs);
+    SolverControl solver_control(solution.size(), 1e-6);
     
+    SolverMinRes<BlockVector<double>> solver(solver_control);
+
+    solver.solve(system_matrix, solution, system_rhs, IdentityMatrix(solution.size()));
     
-    return;
+    Vector<double> sol1(solution.block(0).size());
+    system_matrix.block(0,0).vmult(solution.block(0), sol1);
+
+    
+    constraints.distribute(solution);
+    
+        
+    for(int i = 0; i < sol1.size(); i++){
+    	std::cout <<  system_rhs[i] << " " << solution[i]  << std::endl; 
+    }	
+
     }*/
         const InverseMatrix<SparseMatrix<double>,
                 typename InnerPreconditioner<dim>::type>
@@ -556,7 +565,7 @@ namespace project {
             SchurComplement<typename InnerPreconditioner<dim>::type> schur_complement(
                     system_matrix, A_inverse);
 
-            SolverControl            solver_control(solution.block(1).size() + 1500,
+            SolverControl            solver_control(solution.block(1).size() + 500,
                                                     1e-6 * schur_rhs.l2_norm());
             SolverCG<Vector<double>> cg(solver_control);
 
@@ -586,7 +595,9 @@ namespace project {
             constraints.distribute(solution);
             
             
-        const QGauss<1> quadrature_1D(3);
+     
+        }
+           const QGauss<1> quadrature_1D(3);
             
         NonMatching::RegionUpdateFlags region_update_flags;
         region_update_flags.inside = update_values | update_JxW_values | update_quadrature_points;
@@ -619,6 +630,9 @@ namespace project {
 		      for (const unsigned int q : fe_values->quadrature_point_indices())
 		        {
 		          const Point<dim> &point = fe_values->quadrature_point(q);
+		          if(std::sqrt(point[0] * point[0] + point[1] * point[1]) > 1) {
+		        	std::cout << "Outside" << std::endl;
+		          }
 		          Vector<double> s(dim);
 		          analytical_solution.vector_value(point, s);
 		          Tensor<1,dim> s1;
@@ -649,8 +663,7 @@ namespace project {
 	    const double L2_error = VectorTools::compute_global_error(triangulation,
                                           difference_per_cell,
                                           VectorTools::L2_norm);*/
-	std::cout << "L2Error for velocity: " << std::sqrt(error_L2_squared) << std::endl;
-        }
+	std::cout << "L2Error for velocity: " << (error_L2_squared) << std::endl;
     }
 
 
@@ -741,9 +754,17 @@ namespace project {
             for (const auto &face : cell->face_iterators())
                 if (face->center()[dim - 1] >= 1.20)
                     face->set_all_boundary_ids(1);*/
-
-
+		
         triangulation.refine_global(3 - dim);
+	for(const auto &cell : triangulation.active_cell_iterators()) {
+		if(cell->center().norm() < 0.5){
+			std::cout << "REFINED ONE CELL " << std::endl;
+			cell->set_refine_flag();
+			break;
+		}
+	}
+	
+	triangulation.execute_coarsening_and_refinement();
 
         for (unsigned int refinement_cycle = 0; refinement_cycle < 6;
              ++refinement_cycle)
